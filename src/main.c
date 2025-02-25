@@ -114,6 +114,8 @@ main (Sint32 args_count, char **arguments)
   atexit (returnToMenu);
 #endif
 
+setenv("PULSE_PROP_application.name", "Powermanga", 1);
+setenv("PULSE_PROP_media.role", "x-maemo", 1);
 
   /* allocate memory table */
 #if defined (USE_MALLOC_WRAPPER)
