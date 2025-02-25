@@ -4,7 +4,7 @@
 #
 ####################################################################
 
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.16)
 
 project(PowerManga C)
 
@@ -31,6 +31,14 @@ if(NOT EMSCRIPTEN)
 			if(USE_SDLMIXER)
 				find_package(SDL2_mixer REQUIRED)
 			endif()
+			LIST(APPEND CMAKE_MODULE_PATH "/usr/share/ECM/cmake/")
+			FIND_PACKAGE(ECM REQUIRED NO_MODULE)
+			LIST(APPEND CMAKE_MODULE_PATH ${ECM_MODULE_PATH})
+			FIND_PACKAGE(Wayland REQUIRED COMPONENTS Client OPTIONAL_COMPONENTS Egl)
+			IF(Wayland_Client_FOUND)
+				MESSAGE(STATUS "Found Wayland.")
+			ENDIF()
+
 		else()
 			find_package(SDL REQUIRED)
 			if(USE_SDLMIXER)
@@ -99,7 +107,7 @@ if(NOT EMSCRIPTEN)
 	include_directories(${INCLUDE_DIRECTORIES})
 	if(POWERMANGA_SDL)
 		if(POWERMANGA_SDL2)
-			include_directories(${SDL2_INCLUDE_DIRS})
+			include_directories(${SDL2_INCLUDE_DIRS} ${Wayland_INCLUDE_DIRS})
 			if(USE_SDLMIXER)
 				include_directories(${SDL2_MIXER_INCLUDE_DIRS})
 			endif()
@@ -209,10 +217,11 @@ add_executable(
 if(NOT EMSCRIPTEN)
 	if(POWERMANGA_SDL)
 		if(POWERMANGA_SDL2)
-			target_link_libraries(powermanga ${SDL2_LIBRARIES})
+			target_link_libraries(powermanga ${SDL2_LIBRARIES} ${Wayland_LIBRARIES})
 			if(USE_SDLMIXER)
 				target_link_libraries(powermanga ${SDL2_MIXER_LIBRARIES})
 			endif()
+
 		else()
 			target_link_libraries(powermanga ${SDL_LIBRARIES})
 			if(USE_SDLMIXER)
