@@ -96,19 +96,11 @@ static const char *musics_filenames[] = {
 };
 #else
 
-#ifdef POWERMANGA_HANDHELD_CONSOLE
 static const char *musics_filenames[] = {
   "sounds/handheld_console/music_menu.ogg",
   "sounds/handheld_console/music_game.ogg",
   "sounds/handheld_console/music_congratulations.ogg"
 };
-#else
-static const char *musics_filenames[] = {
-  "sounds/music_menu.zik",
-  "sounds/music_game.zik",
-  "sounds/music_congratulations.zik"
-};
-#endif
 
 #endif /* __EMSCRIPTEN__ */
 
@@ -147,6 +139,7 @@ sound_once_init (void)
       power_conf->nosound = 1;
       return 1;
     }
+
 #ifdef POWERMANGA_GPX2
   /* we need a reduced audio rate for the GP2X to make sure sound
    * doesn't lag */
