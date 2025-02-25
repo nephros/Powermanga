@@ -47,6 +47,9 @@
 
 #if defined(POWERMANGA_SDL) && defined(POWERMANGA_SDL2)
 
+#include <SDL2/SDL_syswm.h>
+#include <wayland-client-protocol.h>
+
 #if defined(POWERMANGA_GP2X) || defined(_WIN32_WCE)
 static Uint32 display_offset_y = 0;
 #endif
@@ -112,6 +115,7 @@ static SDL_Renderer *main_renderer = NULL;
 /* SDL surfaces */
 #define MAX_OF_SURFACES 100
 static SDL_Surface *public_surface = NULL;
+static SDL_Texture* texture = NULL;
 /** 512x440: game's offscreen  */
 static SDL_Surface *game_surface = NULL;
 /** offscreen to resize to 640x400, 960x600 or 1280x800 */
@@ -146,6 +150,7 @@ static void display_640x400 (void);
 #ifdef USE_SCALE2X
 static void display_scale_x (void);
 #endif
+static void output_fullsceen (void);
 static SDL_Surface *create_surface (Uint32 width, Uint32 height);
 static void get_rgb_mask (Uint32 * rmask, Uint32 * gmask, Uint32 * bmask);
 static void free_surface (SDL_Surface * surface);
@@ -290,7 +295,8 @@ init_video_mode (void)
 	
 	if (power_conf->fullscreen > 0)
     {
-      flag = flag | SDL_WINDOW_FULLSCREEN;
+      //flag = flag | SDL_WINDOW_FULLSCREEN;
+      flag = flag | SDL_WINDOW_FULLSCREEN_DESKTOP;
     }
 		
   width = window_width;
@@ -318,28 +324,36 @@ init_video_mode (void)
 
   /* initialize video mode */
   
-  main_window = SDL_CreateWindow(window_tile, SDL_WINDOWPOS_UNDEFINED, 
-	SDL_WINDOWPOS_UNDEFINED, width, height, flag);
-  if (main_window == NULL) 
+  main_window = SDL_CreateWindow(window_tile, SDL_WINDOWPOS_UNDEFINED,
+	SDL_WINDOWPOS_UNDEFINED, 0, 0, flag);
+  if (main_window == NULL)
     {
 	  LOG_ERR("SDL_CreateWindow() return %s", SDL_GetError());
 	  return FALSE;
     }
-      
-  public_surface = SDL_GetWindowSurface(main_window);
-  if (public_surface == NULL)
-    {
-      LOG_ERR ("SDL_GetWindowSurface() return %s", SDL_GetError ());
-      return FALSE;
-    }
-	
-  main_renderer = SDL_CreateSoftwareRenderer(public_surface);
+
+	SDL_GetWindowSize(main_window, &window_width, &window_height);
+	LOG_INF("SDL_CreateWindow() created size %i %i", window_width, window_height);
+
+
+  SDL_SysWMinfo swminfo;
+  SDL_VERSION(&swminfo.version)
+  SDL_GetWindowWMInfo(main_window, &swminfo);
+  struct wl_surface *sdl_wl_surface = swminfo.info.wl.surface;
+  wl_surface_set_buffer_transform(sdl_wl_surface, WL_OUTPUT_TRANSFORM_90);
+  //wl_surface_set_buffer_transform(sdl_wl_surface, WL_OUTPUT_TRANSFORM_270);
+  LOG_INF ("Wayland buffer rotated.");
+
+  Uint32 rflags;
+  //rflags = SDL_RENDERER_TARGETTEXTURE | SDL_RENDERER_SOFTWARE;
+  rflags = SDL_RENDERER_TARGETTEXTURE;
+  main_renderer = SDL_CreateRenderer(main_window, -1, rflags);
   if (main_renderer == NULL) 
     {
-	  LOG_ERR("SDL_CreateSoftwareRenderer() return %s", SDL_GetError());
+	  LOG_ERR("SDL_CreateRenderer() return %s", SDL_GetError());
 	  return FALSE;
     }
-	
+
   SDL_DisplayMode dm;
   int r = SDL_GetWindowDisplayMode(main_window, &dm);
   if (r != 0)
@@ -347,7 +361,8 @@ init_video_mode (void)
       LOG_ERR ("SDL_GetWindowDisplayMode() return %s", SDL_GetError ());
       return FALSE;
     }
-  
+	LOG_INF("SDL_GetWindowDisplayMode() reported size %i %i", dm.w, dm.h);
+
   bytes_per_pixel = SDL_BYTESPERPIXEL(dm.format); 
   /* note: SDL_BITSPERPIXEL can return 24 for 4 bytes per pixels if
      alpha is ignored in video mode */
@@ -360,9 +375,18 @@ init_video_mode (void)
            " window_height: %i; bits_per_pixel: %i; Rmask",
            width, height, bits_per_pixel);
 
-  /* clear screen */  
+  // must create it here, otherwise bits_per_pixel is not known, which is used by create_surface
+  public_surface = create_surface (width, height);
+  if (public_surface == NULL)
+    {
+      LOG_ERR ("public_surface return %s", SDL_GetError ());
+      return FALSE;
+    }
+
+  /* clear screen */
   SDL_FillRect(public_surface, NULL, 0);
-  SDL_UpdateWindowSurface(main_window);
+  //SDL_UpdateWindowSurface(main_window);
+  output_fullsceen ();
 
 #ifdef POWERMANGA_GP2X
   /* The native resolution is 320x200, so we scale up to 320x240
@@ -387,6 +411,39 @@ init_video_mode (void)
       SDL_ShowCursor (SDL_ENABLE);
     }
   return TRUE;
+}
+
+void
+output_fullsceen ()
+{
+  SDL_RenderClear(main_renderer);      //clear renderer for drawing
+  texture = SDL_CreateTextureFromSurface(main_renderer, public_surface);
+  if (texture != NULL) {
+	SDL_Rect drect;
+	float rat;
+	Uint16 base_width;
+	Uint16 base_offset;
+
+	//rat = (public_surface->w / public_surface->h);
+	rat = 512/440;
+	// make as wide as the smaller dim
+	base_width = ( window_width >= window_height) ? window_height : window_width;
+	// place the offset along the larger dim
+	base_offset = ( window_width >= window_height) ? window_width : window_height;
+
+	// FIXME: is using window_height correct here, assuming landscape mode? 
+	//drect.x = (window_height - public_surface->w)/2;
+	drect.x = 0;
+	drect.y = (base_offset - public_surface->w)/2;
+	drect.w = (Uint16) base_width;
+	drect.h = (Uint16) base_width/rat;
+
+	//SDL_SetTextureBlendMode(texture, SDL_BLENDMODE_NONE);
+	SDL_RenderCopyEx(main_renderer, texture, NULL, &drect, 90.0, NULL, SDL_FLIP_NONE);
+	//SDL_RenderCopy(main_renderer, texture, NULL, &drect);
+	SDL_RenderPresent(main_renderer);    //present renderer
+	SDL_DestroyTexture(texture);
+  }
 }
 
 /**
@@ -1432,7 +1489,8 @@ display_movie (void)
           {
             LOG_ERR ("SDL_BlitSurface() return %s", SDL_GetError ());
           }
-		  SDL_UpdateWindowSurface(main_window);
+		  //SDL_UpdateWindowSurface(main_window);
+		  output_fullsceen();
       }
       break;
 
@@ -1471,7 +1529,8 @@ display_movie (void)
           }
       }
 
-	  SDL_UpdateWindowSurface(main_window);
+	  //SDL_UpdateWindowSurface(main_window);
+	  output_fullsceen();
       break;
 
       /* scale 2x, 3x or 4x mode */
@@ -1488,7 +1547,8 @@ display_movie (void)
 #ifdef __EMSCRIPTEN__
       SDL_UnlockSurface (public_surface);
 #endif
-	  SDL_UpdateWindowSurface(main_window);
+	  //SDL_UpdateWindowSurface(main_window);
+	  output_fullsceen();
       break;
     }
 }
@@ -1643,7 +1703,8 @@ display_320x200 (void)
           is_player_score_displayed = FALSE;
         }
     }
-  SDL_UpdateWindowSurface(main_window);
+  //SDL_UpdateWindowSurface(main_window);
+  output_fullsceen();
 }
 
 /**
@@ -1762,7 +1823,8 @@ display_scale_x (void)
   SDL_UnlockSurface (public_surface);
 #endif
 
-  SDL_UpdateWindowSurface(main_window);
+  //SDL_UpdateWindowSurface(main_window);
+  output_fullsceen();
 }
 #endif
 
@@ -2034,7 +2096,8 @@ display_640x400 (void)
   SDL_UnlockSurface (scalex_surface);
 #endif
 
- SDL_UpdateWindowSurface(main_window);
+ //SDL_UpdateWindowSurface(main_window);
+ output_fullsceen();
 }
 
 #ifdef USE_SDL_JOYSTICK
@@ -2126,6 +2189,8 @@ display_free (void)
 #ifdef USE_SDL_JOYSTICK
   display_close_joysticks ();
 #endif
+  SDL_DestroyTexture(texture);
+  texture = NULL;
   SDL_DestroyRenderer(main_renderer);
   main_renderer = NULL;
   SDL_DestroyWindow(main_window);
