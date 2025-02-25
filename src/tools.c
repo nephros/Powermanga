@@ -625,7 +625,7 @@ locate_data_file (const char *const name)
 #ifdef __EMSCRIPTEN__
   const char *subdir = "/assets/";
 #else
-  const char *subdir = "/share/games/powermanga/";
+  const char *subdir = "/usr/share/powermanga/";
 #endif
 
   if (name == NULL)
