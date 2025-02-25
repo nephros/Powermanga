@@ -234,6 +234,9 @@ display_init (void)
       LOG_ERR ("SDL_Init() failed: %s", SDL_GetError ());
       return FALSE;
     }
+
+  SDL_SetHint(SDL_HINT_TOUCH_MOUSE_EVENTS, "0");
+
 #ifdef USE_SDL_JOYSTICK
   if (!display_open_joysticks ())
     {
@@ -895,11 +898,79 @@ display_handle_events (void)
   SDL_Event event;
   SDL_KeyboardEvent *ke;
   Uint32 uc;
+  //Uint32 numfingers;
   while (SDL_PollEvent (&event) > 0)
     {
       switch (event.type)
         {
-        case SDL_KEYDOWN:
+       case SDL_MULTIGESTURE:
+       break;
+       case SDL_SENSORUPDATE: ;
+           int numdat;
+           numdat = sizeof(event.sensor.data) / sizeof(event.sensor.data[0]);
+           LOG_INF ("SDL_SDL_SENSORUPDATE: %i: %i", event.sensor.which, numdat, event.sensor.data[0]);
+       break;
+       case SDL_FINGERDOWN:
+           //numfingers = SDL_GetNumTouchFingers(event.tfinger.touchId);
+           /*      |
+                   |        |             |        |
+                   |        | V      V    |        |
+                   |   up   |   V  .      |    S   |   Start
+                   |        |             |        |
+                   | l    r |      .      |    F   |   Fire
+                   |        |             |        |
+                   |   dn   |             |    O   |   Option
+                   |        |     .^.     |        |
+                   |        |             |        |
+           */
+       if ( event.tfinger.y <= 0.25f ) { // left controls
+         if (event.tfinger.x <= 0.33f) { // top third
+           joy_down = TRUE;
+           sprites_string_set_joy (IJOY_DOWN);
+         } else if (event.tfinger.x <= 0.66f) { // middle
+           if (event.tfinger.y <= 0.12f) {       // left
+             joy_left = TRUE;
+             sprites_string_set_joy (IJOY_LEFT);
+           } else if (event.tfinger.y > 0.12f) { // right
+             joy_right = TRUE;
+             sprites_string_set_joy (IJOY_RIGHT);
+           }
+         } else  { // bottom
+           joy_top = TRUE;
+           sprites_string_set_joy (IJOY_TOP);
+         }
+       } else if ( event.tfinger.y > 0.75f ) { // right controls/buttons
+         if (event.tfinger.x <= 0.33f) { // top third
+           option_button_down = TRUE;
+           sprites_string_set_joy (IJOY_OPT);
+         } else if (event.tfinger.x <= 0.66f) { // middle
+           fire_button_down = TRUE;
+           sprites_string_set_joy (IJOY_FIRE);
+         } else  { // bottom
+           start_button_down = TRUE;
+         }
+       }
+       break;
+       case SDL_FINGERMOTION:
+            //numfingers = SDL_GetNumTouchFingers(event.tfinger.touchId);
+            //LOG_INF ("SDL_FINGERMOTION: %i at %f %f, delta %f %f", event.tfinger.touchId, event.tfinger.x, event.tfinger.y, event.tfinger.dx, event.tfinger.dy );
+            break;
+        case SDL_FINGERUP:
+            fire_button_down   = FALSE;
+            option_button_down = FALSE;
+            start_button_down  = FALSE;
+            sprites_string_clr_joy (IJOY_OPT);
+            sprites_string_clr_joy (IJOY_FIRE);
+            joy_top    = FALSE;
+            joy_down   = FALSE;
+            joy_left   = FALSE;
+            joy_right  = FALSE;
+            sprites_string_clr_joy (IJOY_TOP);
+            sprites_string_clr_joy (IJOY_DOWN);
+            sprites_string_clr_joy (IJOY_LEFT);
+            sprites_string_clr_joy (IJOY_RIGHT);
+         break;
+       case SDL_KEYDOWN:
           {
             ke = (SDL_KeyboardEvent *) & event;
              /*LOG_INF ("SDL_KEYDOWN: "
