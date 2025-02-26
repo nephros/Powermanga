@@ -437,7 +437,11 @@ output_fullsceen ()
 	// FIXME: is using window_height correct here, assuming landscape mode? 
 	//drect.x = (window_height - public_surface->w)/2;
 	drect.x = 0;
-	drect.y = (base_offset - public_surface->w)/2;
+	if (power_conf->scale_x >= 2 ) {
+		drect.y = (base_offset - public_surface->w)/power_conf->scale_x;
+	} else {
+		drect.y = (base_offset - public_surface->w)/2;
+	}
 	drect.w = (Uint16) base_width;
 	drect.h = (Uint16) base_width/rat;
 
