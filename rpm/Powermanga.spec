@@ -16,12 +16,6 @@ License:    GPLv3+
 URL:        https://github.com/brunonymous/Powermanga
 Source0:    %{name}-%{version}.tar.gz
 Source100:  Powermanga.yaml
-Patch0:     datadir.patch
-Patch1:     sdl-audio-pulse-role.patch
-Patch2:     sdl-audio-oggfiles.patch
-Patch3:     sdl-window-cmake.patch
-Patch4:     sdl-window.patch
-Patch5:     sdl-touchinput.patch
 BuildRequires:  pkgconfig(sdl2)
 BuildRequires:  pkgconfig(SDL2_mixer)
 BuildRequires:  pkgconfig(egl)
@@ -55,18 +49,6 @@ Screenshots:
 %prep
 %setup -q -n %{name}-%{version}
 
-# datadir.patch
-%patch0 -p1
-# sdl-audio-pulse-role.patch
-%patch1 -p1
-# sdl-audio-oggfiles.patch
-%patch2 -p1
-# sdl-window-cmake.patch
-%patch3 -p1
-# sdl-window.patch
-%patch4 -p1
-# sdl-touchinput.patch
-%patch5 -p1
 # >> setup
 # << setup
 
