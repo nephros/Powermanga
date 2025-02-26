@@ -31,7 +31,7 @@
 #include "lispreader.h"
 #include "log_recorder.h"
 
-#define CONFIG_DIR_NAME "tlk-games"
+#define CONFIG_DIR_NAME "tlk-games/powermanga"
 #define CONFIG_FILE_NAME "powermanga.conf"
 
 config_file *power_conf = NULL;
