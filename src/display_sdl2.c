@@ -444,9 +444,51 @@ output_fullsceen ()
 	}
 	drect.w = (Uint16) base_width;
 	drect.h = (Uint16) base_width/rat;
-
 	//SDL_SetTextureBlendMode(texture, SDL_BLENDMODE_NONE);
+
 	SDL_RenderCopyEx(main_renderer, texture, NULL, &drect, 90.0, NULL, SDL_FLIP_NONE);
+
+	// draw controls:
+	SDL_Rect larea;
+	larea.x=0; larea.y=drect.y+drect.w;
+	larea.h=drect.y; larea.w=base_width;
+	SDL_SetRenderDrawColor(main_renderer,0,128,0,128);
+	SDL_RenderDrawRect(main_renderer,&larea);
+
+	SDL_Rect rarea;
+	rarea.x=0; rarea.y=0;
+	rarea.h=drect.y; rarea.w=base_width;
+	SDL_SetRenderDrawColor(main_renderer,128,0,0,128);
+	SDL_RenderDrawRect(main_renderer,&rarea);
+
+	SDL_Rect ctrl;
+	SDL_SetRenderDrawColor(main_renderer,0,0,128,128);
+	//a horiz.line
+	ctrl.y = larea.x; ctrl.x = larea.w/3;
+	ctrl.h = larea.h; ctrl.w = 3;
+	SDL_RenderDrawRect(main_renderer,&ctrl);
+	ctrl.y = larea.x; ctrl.x = 2*larea.w/3;
+	ctrl.h = larea.h; ctrl.w = 3;
+	SDL_RenderDrawRect(main_renderer,&ctrl);
+	//center vert. line
+	ctrl.y = larea.x + larea.w/3; ctrl.x = larea.w/3;
+	ctrl.w = larea.w/3; ctrl.h = 3;
+	SDL_RenderDrawRect(main_renderer,&ctrl);
+
+	//a horiz.line
+	SDL_SetRenderDrawColor(main_renderer,128,128,0,128);
+	ctrl.y = rarea.h+drect.h; ctrl.x = rarea.w/3;
+	ctrl.h = rarea.h; ctrl.w = 3;
+	SDL_RenderDrawRect(main_renderer,&ctrl);
+
+	ctrl.y = rarea.h+drect.h; ctrl.x = 2*rarea.w/3;
+	ctrl.h = rarea.h; ctrl.w = 3;
+	SDL_RenderDrawRect(main_renderer,&ctrl);
+
+	//SDL_RenderDrawLine(main_renderer, 0, drect.h/3, drect.x, drect.h/3);
+	// end controls
+	SDL_SetRenderDrawColor(main_renderer,0,0,0,0);
+
 	//SDL_RenderCopy(main_renderer, texture, NULL, &drect);
 	SDL_RenderPresent(main_renderer);    //present renderer
 	SDL_DestroyTexture(texture);
