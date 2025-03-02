@@ -464,21 +464,15 @@ output_fullsceen ()
 
 	SDL_RenderCopyEx(main_renderer, texture, NULL, &drect, 90.0, NULL, SDL_FLIP_NONE);
 
-	// draw controls:
+	// draw control areas, left and right of the game:
 	SDL_Rect larea;
 	larea.x=0; larea.y=drect.y+drect.w;
 	larea.h=drect.y; larea.w=base_width;
-	SDL_SetRenderDrawColor(main_renderer,0,128,0,128);
-	SDL_RenderDrawRect(main_renderer,&larea);
-
 	SDL_Rect rarea;
 	rarea.x=0; rarea.y=0;
 	rarea.h=drect.y; rarea.w=base_width;
-	SDL_SetRenderDrawColor(main_renderer,128,0,0,128);
-	SDL_RenderDrawRect(main_renderer,&rarea);
 
-	SDL_SetRenderDrawColor(main_renderer,0,0,128,128);
-
+	// helper rects to place the triangles in:
 	SDL_Rect ru;
 	ru.y = (larea.w/3)/2; ru.x = 2*larea.w/3;
 	ru.h = larea.h/2; ru.w = larea.w/3;
@@ -495,9 +489,7 @@ output_fullsceen ()
 	// h = a * (sqrt(3)/2)
 	Uint32 trih = rl.h/3;             // height of the triangle
 	Uint32 tril = trih / (sqrt(3)/2); // side length of the triangle
-	SDL_FPoint a;
-	SDL_FPoint b;
-	SDL_FPoint c;
+	SDL_FPoint a; SDL_FPoint b; SDL_FPoint c;
 
 	a.x = rl.x + rl.w/2; a.y = rl.y + rl.h/3;
 	b.x = a.x - tril/2;  b.y = a.y + trih;
@@ -552,7 +544,6 @@ output_fullsceen ()
 	quad[0].color = violet; quad[1].color = red;
 	quad[2].color = violet; quad[3].color = red;
 	SDL_RenderGeometry( main_renderer, NULL, quad, 4, q_indices, 6 );
-
 
 	// upperbutt
 	b1.y = rarea.h+drect.h+bh/2;
