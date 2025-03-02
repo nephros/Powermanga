@@ -117,9 +117,19 @@ static SDL_Renderer *main_renderer = NULL;
 static SDL_Surface *public_surface = NULL;
 static SDL_Texture* texture = NULL;
 static SDL_Vertex triangle[3] = {
-	{ {0,0}, { 255,0,0,128}, {0,0} },
-	{ {0,0}, { 0,0,0,128}, {0,0} },
-	{ {0,0}, { 0,0,0,128}, {0,0} },
+	{ {0,0}, { 255,0,0,255}, {0,0} },
+	{ {0,0}, { 0,0,128,128}, {0,0} },
+	{ {0,0}, { 0,0,128,128}, {0,0} },
+};
+static SDL_Vertex quad[4] = {
+	{ {0,0}, { 255,0,0,255}, {0,0} },
+	{ {0,0}, { 0,0,128,128}, {0,0} },
+	{ {0,0}, { 0,0,128,128}, {0,0} },
+	{ {0,0}, { 0,0,128,128}, {0,0} },
+};
+static const int q_indices[] = { // for drawing the quad
+0,1,2,
+2,3,0
 };
 
 /** 512x440: game's offscreen  */
@@ -467,7 +477,6 @@ output_fullsceen ()
 	SDL_SetRenderDrawColor(main_renderer,128,0,0,128);
 	SDL_RenderDrawRect(main_renderer,&rarea);
 
-	SDL_Rect ctrl;
 	SDL_SetRenderDrawColor(main_renderer,0,0,128,128);
 
 	SDL_Rect ru;
@@ -484,7 +493,7 @@ output_fullsceen ()
 	rl.h = larea.h/2; rl.w = larea.w/3;
 
 	// h = a * (sqrt(3)/2)
-	Uint32 trih = rl.h/3 ;
+	Uint32 trih = rl.h/3;             // height of the triangle
 	Uint32 tril = trih / (sqrt(3)/2); // side length of the triangle
 	SDL_FPoint a;
 	SDL_FPoint b;
@@ -522,17 +531,53 @@ output_fullsceen ()
 	triangle[2].position = c;
 	SDL_RenderGeometry( main_renderer, NULL, triangle, 3, NULL, 0 );
 
-	//a horiz.line
-	SDL_SetRenderDrawColor(main_renderer,128,128,0,128);
-	ctrl.y = rarea.h+drect.h; ctrl.x = rarea.w/3;
-	ctrl.h = rarea.h; ctrl.w = 3;
-	SDL_RenderDrawRect(main_renderer,&ctrl);
+	// buttons
+	//SDL_SetRenderDrawColor(main_renderer,196,0,0,128);
+	const Uint32 bh = 200; const Uint32 bw = 100;
+	SDL_FPoint b1; SDL_FPoint b2;
+	SDL_FPoint b3; SDL_FPoint b4;
+	const SDL_Color orange = { 255, 128, 0, 255 };
+	const SDL_Color red =    { 128, 0, 0, 255 };
+	const SDL_Color violet = { 128, 0, 128, 255 };
+	const SDL_Color blue =   { 0, 0, 255, 255 };
+	const SDL_Color cyan =   { 0, 128, 255, 255 };
 
-	ctrl.y = rarea.h+drect.h; ctrl.x = 2*rarea.w/3;
-	ctrl.h = rarea.h; ctrl.w = 3;
-	SDL_RenderDrawRect(main_renderer,&ctrl);
+	// centerbutt
+	b1.y = rarea.h+drect.h+bh/2; b1.x = (rarea.w-bw)/2;
+	b2.x = b1.x+bw; b2.y = b1.y;
+	b3.x = b1.x+bw; b3.y = b1.y+bh;
+	b4.x = b1.x; b4.y = b1.y+bh;
+	quad[0].position = b1; quad[1].position = b2;
+	quad[2].position = b3; quad[3].position = b4;
+	quad[0].color = violet; quad[1].color = red;
+	quad[2].color = violet; quad[3].color = red;
+	SDL_RenderGeometry( main_renderer, NULL, quad, 4, q_indices, 6 );
 
-	//SDL_RenderDrawLine(main_renderer, 0, drect.h/3, drect.x, drect.h/3);
+
+	// upperbutt
+	b1.y = rarea.h+drect.h+bh/2;
+	b1.x = 5*rarea.w/6-bw/2;
+	b2.x = b1.x+bw; b2.y = b1.y;
+	b3.x = b1.x+bw; b3.y = b1.y+bh;
+	b4.x = b1.x; b4.y = b1.y+bh;
+	quad[0].position = b1; quad[1].position = b2;
+	quad[2].position = b3; quad[3].position = b4;
+	quad[0].color = cyan; quad[1].color = cyan;
+	quad[2].color = blue;    quad[3].color = cyan;
+	SDL_RenderGeometry( main_renderer, NULL, quad, 4, q_indices, 6 );
+
+	// lowerbutt
+	b1.y = rarea.h+drect.h+bh/2;
+	b1.x = rarea.w/6-bw/2;
+	b2.x = b1.x+bw; b2.y = b1.y;
+	b3.x = b1.x+bw; b3.y = b1.y+bh;
+	b4.x = b1.x; b4.y = b1.y+bh;
+	quad[0].position = b1; quad[1].position = b2;
+	quad[2].position = b3; quad[3].position = b4;
+	quad[0].color = orange; quad[1].color = orange;
+	quad[2].color = red;    quad[3].color = orange;
+	SDL_RenderGeometry( main_renderer, NULL, quad, 4, q_indices, 6 );
+
 	// end controls
 	SDL_SetRenderDrawColor(main_renderer,0,0,0,0);
 
