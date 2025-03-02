@@ -365,7 +365,7 @@ init_video_mode (void)
 
   Uint32 rflags;
   //rflags = SDL_RENDERER_TARGETTEXTURE | SDL_RENDERER_SOFTWARE;
-  rflags = SDL_RENDERER_TARGETTEXTURE;
+  rflags = SDL_RENDERER_TARGETTEXTURE | SDL_RENDERER_ACCELERATED;
   main_renderer = SDL_CreateRenderer(main_window, -1, rflags);
   if (main_renderer == NULL) 
     {
