@@ -117,7 +117,7 @@ static SDL_Renderer *main_renderer = NULL;
 static SDL_Surface *public_surface = NULL;
 static SDL_Texture* texture = NULL;
 static SDL_Vertex triangle[3] = {
-	{ {0,0}, { 255,0,0,255}, {0,0} },
+	{ {0,0}, { 0,0,0,0}, {0,0} },
 	{ {0,0}, { 0,0,128,128}, {0,0} },
 	{ {0,0}, { 0,0,128,128}, {0,0} },
 };
