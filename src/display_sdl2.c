@@ -116,6 +116,12 @@ static SDL_Renderer *main_renderer = NULL;
 #define MAX_OF_SURFACES 100
 static SDL_Surface *public_surface = NULL;
 static SDL_Texture* texture = NULL;
+static SDL_Vertex triangle[3] = {
+	{ {0,0}, { 255,0,0,128}, {0,0} },
+	{ {0,0}, { 0,0,0,128}, {0,0} },
+	{ {0,0}, { 0,0,0,128}, {0,0} },
+};
+
 /** 512x440: game's offscreen  */
 static SDL_Surface *game_surface = NULL;
 /** offscreen to resize to 640x400, 960x600 or 1280x800 */
@@ -463,17 +469,58 @@ output_fullsceen ()
 
 	SDL_Rect ctrl;
 	SDL_SetRenderDrawColor(main_renderer,0,0,128,128);
-	//a horiz.line
-	ctrl.y = larea.x; ctrl.x = larea.w/3;
-	ctrl.h = larea.h; ctrl.w = 3;
-	SDL_RenderDrawRect(main_renderer,&ctrl);
-	ctrl.y = larea.x; ctrl.x = 2*larea.w/3;
-	ctrl.h = larea.h; ctrl.w = 3;
-	SDL_RenderDrawRect(main_renderer,&ctrl);
-	//center vert. line
-	ctrl.y = larea.x + larea.w/3; ctrl.x = larea.w/3;
-	ctrl.w = larea.w/3; ctrl.h = 3;
-	SDL_RenderDrawRect(main_renderer,&ctrl);
+
+	SDL_Rect ru;
+	ru.y = (larea.w/3)/2; ru.x = 2*larea.w/3;
+	ru.h = larea.h/2; ru.w = larea.w/3;
+	SDL_Rect rd;
+	rd.y = (larea.w/3)/2; rd.x = 0;
+	rd.h = larea.h/2; rd.w = larea.w/3;
+	SDL_Rect rr;
+	rr.y = (2*larea.w/3)/2; rr.x = larea.w/3;
+	rr.h = larea.h/2; rr.w = larea.w/3;
+	SDL_Rect rl;
+	rl.y = 0; rl.x = larea.w/3;
+	rl.h = larea.h/2; rl.w = larea.w/3;
+
+	// h = a * (sqrt(3)/2)
+	Uint32 trih = rl.h/3 ;
+	Uint32 tril = trih / (sqrt(3)/2); // side length of the triangle
+	SDL_FPoint a;
+	SDL_FPoint b;
+	SDL_FPoint c;
+
+	a.x = rl.x + rl.w/2; a.y = rl.y + rl.h/3;
+	b.x = a.x - tril/2;  b.y = a.y + trih;
+	c.x = a.x + tril/2,  c.y = a.y + trih;
+	triangle[0].position = a;
+	triangle[1].position = b;
+	triangle[2].position = c;
+	SDL_RenderGeometry( main_renderer, NULL, triangle, 3, NULL, 0 );
+
+	a.x = rr.x + rr.w/2; a.y = rr.y + 2*rr.h/3;
+	b.x = a.x - tril/2;  b.y = a.y - trih;
+	c.x = a.x + tril/2;  c.y = a.y - trih;
+	triangle[0].position = a;
+	triangle[1].position = b;
+	triangle[2].position = c;
+	SDL_RenderGeometry( main_renderer, NULL, triangle, 3, NULL, 0 );
+
+	a.x = ru.x + 2*ru.h/3; a.y = ru.y + ru.w/2;
+	b.y = a.y - tril/2;    b.x = a.x - trih;
+	c.y = a.y + tril/2;    c.x = a.x - trih;
+	triangle[0].position = a;
+	triangle[1].position = b;
+	triangle[2].position = c;
+	SDL_RenderGeometry( main_renderer, NULL, triangle, 3, NULL, 0 );
+
+	a.x = rd.x + rd.h/3; a.y = rd.y + rd.w/2;
+	b.y = a.y - tril/2;    b.x = a.x + trih;
+	c.y = a.y + tril/2;    c.x = a.x + trih;
+	triangle[0].position = a;
+	triangle[1].position = b;
+	triangle[2].position = c;
+	SDL_RenderGeometry( main_renderer, NULL, triangle, 3, NULL, 0 );
 
 	//a horiz.line
 	SDL_SetRenderDrawColor(main_renderer,128,128,0,128);
