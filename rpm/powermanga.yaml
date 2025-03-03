@@ -1,4 +1,4 @@
-Name:    Powermanga
+Name:    powermanga
 Summary: An arcade 2D shoot-em-up game
 Version: 0.93.1
 Release: 0
@@ -9,16 +9,6 @@ SCM: https://github.com/brunonymous/Powermanga
 Sources:
     - '%{name}-%{version}.tar.gz'
 #Patches:
-#  # prefi handling is somehow onky, we just hardcode in this patch
-#  - 'datadir.patch'
-#  # make the volume controls work
-#  - 'sdl-audio-pulse-role.patch'
-#  # default is using MOD files for music, SFOS SDL2_mixer cannot handle that
-#  - 'sdl-audio-oggfiles.patch'
-#  - 'sdl-window-cmake.patch'
-#  - 'sdl-window.patch'
-#  # react to finger presses etc.
-#  - 'sdl-touchinput.patch'
 Description: |
     Powermanga is an arcade 2D shoot-em-up game with 41 levels and more
     than 200 sprites.
@@ -58,9 +48,7 @@ ConfigOptions:
   # sdl must be on for sdl2 to be used:
   - -DPOWERMANGA_SDL=ON
   - -DPOWERMANGA_SDL2=ON
-  # game uses MOD files for music, SFOS SDL2_mixer cannot handle that
   - -DUSE_SDLMIXER=ON
-  # -DUSE_SDLMIXER=OFF
 NoIconCache: true
 #BuildArch: noarch
 Files:
