@@ -501,29 +501,18 @@ output_fullsceen ()
 	SDL_RenderCopyEx(main_renderer, texture, NULL, &drect, 90.0, NULL, SDL_FLIP_NONE);
 
 	// draw control areas, left and right of the game:
-	SDL_Rect larea;
-	larea.x=0; larea.y=drect.y+drect.w;
-	larea.h=drect.y; larea.w=base_width;
-	SDL_Rect rarea;
-	rarea.x=0; rarea.y=0;
-	rarea.h=drect.y; rarea.w=base_width;
+	const SDL_Rect larea = { 0, drect.y+drect.w, base_width, drect.y };
+	const SDL_Rect rarea = { 0, 0, base_width, drect.y };
 
 	const char* char_menu   = buttons[18];
 	const char* char_fire   = buttons[16];
 	const char* char_option = buttons[13];
+
 	// helper rects to place the triangles in:
-	SDL_Rect ru;
-	ru.y = (larea.w/3)/2; ru.x = 2*larea.w/3;
-	ru.h = larea.h/2; ru.w = larea.w/3;
-	SDL_Rect rd;
-	rd.y = (larea.w/3)/2; rd.x = 0;
-	rd.h = larea.h/2; rd.w = larea.w/3;
-	SDL_Rect rr;
-	rr.y = (2*larea.w/3)/2; rr.x = larea.w/3;
-	rr.h = larea.h/2; rr.w = larea.w/3;
-	SDL_Rect rl;
-	rl.y = 0; rl.x = larea.w/3;
-	rl.h = larea.h/2; rl.w = larea.w/3;
+	SDL_Rect ru = { 2*larea.w/3, (larea.w/3)/2,     larea.w/3, larea.h/2 };
+	SDL_Rect rd = { 0,           (larea.w/3)/2,     larea.w/3, larea.h/2 };
+	SDL_Rect rr = { larea.w/3,   (2*larea.w/3)/2,   larea.w/3, larea.h/2 };
+	SDL_Rect rl = { larea.w/3,    0,                larea.w/3, larea.h/2 };
 
 	// h = a * (sqrt(3)/2)
 	Uint32 trih = rl.h/3;             // height of the triangle
