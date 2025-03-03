@@ -50,6 +50,8 @@
 #include <SDL2/SDL_syswm.h>
 #include <wayland-client-protocol.h>
 
+#include <SDL2/SDL_ttf.h>
+
 #if defined(POWERMANGA_GP2X) || defined(_WIN32_WCE)
 static Uint32 display_offset_y = 0;
 #endif
@@ -116,22 +118,44 @@ static SDL_Renderer *main_renderer = NULL;
 #define MAX_OF_SURFACES 100
 static SDL_Surface *public_surface = NULL;
 static SDL_Texture* texture = NULL;
+static TTF_Font *font;
 static SDL_Vertex triangle[3] = {
 	{ {0,0}, { 0,0,0,0}, {0,0} },
 	{ {0,0}, { 0,0,128,128}, {0,0} },
 	{ {0,0}, { 0,0,128,128}, {0,0} },
 };
-static SDL_Vertex quad[4] = {
-	{ {0,0}, { 255,0,0,255}, {0,0} },
-	{ {0,0}, { 0,0,128,128}, {0,0} },
-	{ {0,0}, { 0,0,128,128}, {0,0} },
-	{ {0,0}, { 0,0,128,128}, {0,0} },
-};
-static const int q_indices[] = { // for drawing the quad
-0,1,2,
-2,3,0
+static const char* arrows[] = {"⮜","⮞","⮝","⮟","⮘","⮚","⮙","⮛"};
+static const char* buttons[] = {
+  "▢", // White square with rounded corners
+  "⬛", // Black large square
+  "⬜", // White large square
+  "🔲", // Black square button
+  "🔳", // White square button
+
+  "🔴",  // Large red circle
+  "🔵",  // Large blue circle
+  "🔷",  // Large blue diamond
+  "🔶",  // Large orange diamond
+  "🔿", // Upper right shadowed white circle
+
+  "🔾", // Lower right shadowed white circle, circle shadow down
+  "⏯️", // play or pause button emoji
+  "⏯", // play or pause toggle
+  "🆙", // UP! button
+  "💥", // Collision emoji
+
+  "🔴", // large red circle
+  "🔘", // radio button
+  "⏏️", // eject button/emoji
+  "☰" // menu symbol (hamburger circled)
 };
 
+
+static const SDL_Color orange = { 255, 128, 0, 255 };
+static const SDL_Color red =    { 255, 0, 0, 255 };
+//static const SDL_Color violet = { 128, 0, 128, 255 };
+//static const SDL_Color blue =   { 0, 0, 255, 255 };
+static const SDL_Color cyan =   { 0, 128, 255, 255 };
 /** 512x440: game's offscreen  */
 static SDL_Surface *game_surface = NULL;
 /** offscreen to resize to 640x400, 960x600 or 1280x800 */
@@ -248,6 +272,11 @@ display_init (void)
   if (SDL_Init (sdl_flag) < 0)
     {
       LOG_ERR ("SDL_Init() failed: %s", SDL_GetError ());
+      return FALSE;
+    }
+  if (TTF_Init( ) < 0)
+    {
+      LOG_ERR ("TTF_Init() failed: %s", SDL_GetError ());
       return FALSE;
     }
 
@@ -437,11 +466,18 @@ output_fullsceen ()
 {
   SDL_RenderClear(main_renderer);      //clear renderer for drawing
   texture = SDL_CreateTextureFromSurface(main_renderer, public_surface);
+
   if (texture != NULL) {
 	SDL_Rect drect;
 	float rat;
 	Uint16 base_width;
 	Uint16 base_offset;
+
+	// size of fire button etc:
+	const Uint32 buttonHeight = 96; const Uint32 buttonWidth = buttonHeight*2;
+	if ( font == NULL) {
+		font = TTF_OpenFont("/usr/share/fonts/symbola/Symbola.ttf", buttonHeight);
+	};
 
 	//rat = (public_surface->w / public_surface->h);
 	rat = 512/440;
@@ -472,6 +508,9 @@ output_fullsceen ()
 	rarea.x=0; rarea.y=0;
 	rarea.h=drect.y; rarea.w=base_width;
 
+	const char* char_menu   = buttons[18];
+	const char* char_fire   = buttons[16];
+	const char* char_option = buttons[13];
 	// helper rects to place the triangles in:
 	SDL_Rect ru;
 	ru.y = (larea.w/3)/2; ru.x = 2*larea.w/3;
@@ -524,51 +563,57 @@ output_fullsceen ()
 	SDL_RenderGeometry( main_renderer, NULL, triangle, 3, NULL, 0 );
 
 	// buttons
+
 	//SDL_SetRenderDrawColor(main_renderer,196,0,0,128);
-	const Uint32 bh = 200; const Uint32 bw = 100;
-	SDL_FPoint b1; SDL_FPoint b2;
-	SDL_FPoint b3; SDL_FPoint b4;
-	const SDL_Color orange = { 255, 128, 0, 255 };
-	const SDL_Color red =    { 128, 0, 0, 255 };
-	const SDL_Color violet = { 128, 0, 128, 255 };
-	const SDL_Color blue =   { 0, 0, 255, 255 };
-	const SDL_Color cyan =   { 0, 128, 255, 255 };
+	SDL_FPoint buttonPoint;
+	SDL_Surface* textSurface;
+	SDL_Texture* text;
+	SDL_Rect renderQuad;
+	int text_width; int text_height;
 
 	// centerbutt
-	b1.y = rarea.h+drect.h+bh/2; b1.x = (rarea.w-bw)/2;
-	b2.x = b1.x+bw; b2.y = b1.y;
-	b3.x = b1.x+bw; b3.y = b1.y+bh;
-	b4.x = b1.x; b4.y = b1.y+bh;
-	quad[0].position = b1; quad[1].position = b2;
-	quad[2].position = b3; quad[3].position = b4;
-	quad[0].color = violet; quad[1].color = red;
-	quad[2].color = violet; quad[3].color = red;
-	SDL_RenderGeometry( main_renderer, NULL, quad, 4, q_indices, 6 );
+	buttonPoint.y = rarea.h+drect.h+buttonWidth/2;
+	buttonPoint.x = (rarea.w-buttonWidth)/2;
+	textSurface = TTF_RenderUTF8_Solid(font, char_fire, red);
+	if (textSurface == NULL) LOG_INF("Text surface failed: %s.",  TTF_GetError ());
+	text = SDL_CreateTextureFromSurface(main_renderer, textSurface);
+	if (text == NULL) LOG_INF("Text texture failed: %s.",  TTF_GetError ());
+	text_width = textSurface->w; text_height = textSurface->h;
+	renderQuad.x = buttonPoint.x + (buttonWidth/2-text_height/2);
+	renderQuad.y = buttonPoint.y + (buttonHeight/2-text_width/2);
+	renderQuad.w = text_width;
+	renderQuad.h = text_height;
+	SDL_RenderCopyEx(main_renderer, text, NULL, &renderQuad, 90.0, NULL, 0);
 
 	// upperbutt
-	b1.y = rarea.h+drect.h+bh/2;
-	b1.x = 5*rarea.w/6-bw/2;
-	b2.x = b1.x+bw; b2.y = b1.y;
-	b3.x = b1.x+bw; b3.y = b1.y+bh;
-	b4.x = b1.x; b4.y = b1.y+bh;
-	quad[0].position = b1; quad[1].position = b2;
-	quad[2].position = b3; quad[3].position = b4;
-	quad[0].color = cyan; quad[1].color = cyan;
-	quad[2].color = blue;    quad[3].color = cyan;
-	SDL_RenderGeometry( main_renderer, NULL, quad, 4, q_indices, 6 );
+	buttonPoint.x = 5*rarea.w/6-buttonWidth/2;
+	textSurface = TTF_RenderUTF8_Solid(font, char_menu, cyan);
+	if (textSurface == NULL) LOG_INF("Text surface failed: %s.",  TTF_GetError ());
+	text = SDL_CreateTextureFromSurface(main_renderer, textSurface);
+	if (text == NULL) LOG_INF("Text texture failed: %s.",  TTF_GetError ());
+	text_width = textSurface->w; text_height = textSurface->h;
+	renderQuad.x = buttonPoint.x + (buttonWidth/2-text_height/2);
+	renderQuad.y = buttonPoint.y + (buttonHeight/2-text_width/2);
+	renderQuad.w = text_width;
+	renderQuad.h = text_height;
+	SDL_RenderCopyEx(main_renderer, text, NULL, &renderQuad, 90.0, NULL, 0);
 
 	// lowerbutt
-	b1.y = rarea.h+drect.h+bh/2;
-	b1.x = rarea.w/6-bw/2;
-	b2.x = b1.x+bw; b2.y = b1.y;
-	b3.x = b1.x+bw; b3.y = b1.y+bh;
-	b4.x = b1.x; b4.y = b1.y+bh;
-	quad[0].position = b1; quad[1].position = b2;
-	quad[2].position = b3; quad[3].position = b4;
-	quad[0].color = orange; quad[1].color = orange;
-	quad[2].color = red;    quad[3].color = orange;
-	SDL_RenderGeometry( main_renderer, NULL, quad, 4, q_indices, 6 );
+	buttonPoint.x = rarea.w/6-buttonWidth/2;
+	textSurface = TTF_RenderUTF8_Solid(font, char_option, orange);
+	if (textSurface == NULL) LOG_INF("Text surface failed: %s.",  TTF_GetError ());
+	text = SDL_CreateTextureFromSurface(main_renderer, textSurface);
+	if (text == NULL) LOG_INF("Text texture failed: %s.",  TTF_GetError ());
+	text_width = textSurface->w; text_height = textSurface->h;
+	renderQuad.x = buttonPoint.x + (buttonWidth/2-text_height/2);
+	renderQuad.y = buttonPoint.y + (buttonHeight/2-text_width/2);
+	renderQuad.w = text_width;
+	renderQuad.h = text_height;
+	SDL_RenderCopyEx(main_renderer, text, NULL, &renderQuad, 90.0, NULL, 0);
 
+
+	SDL_FreeSurface(textSurface);
+	SDL_DestroyTexture(text);
 	// end controls
 	SDL_SetRenderDrawColor(main_renderer,0,0,0,0);
 
