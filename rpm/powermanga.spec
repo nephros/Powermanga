@@ -80,9 +80,9 @@ cp -r graphics %{buildroot}%{_datadir}/powermanga/
 # << install pre
 
 # >> install post
-printf '\n[X-Sailjail]\nApplicationName=powermanga\nOrganizationName=tlk-games\nPermissions=Sensors;Audio\n' >> powermanga.desktop
 install -Dpm644 powermanga.desktop %{buildroot}%{_datadir}/applications/powermanga.desktop
 install -Dpm644 images_for_menu_entry/powermanga.48.png %{buildroot}%{_datadir}/icons/hicolor/48x48/apps/powermanga.png
+printf '\n[X-Sailjail]\nApplicationName=powermanga\nOrganizationName=tlk-games\nPermissions=Sensors;Audio\n' >> %{buildroot}%{_datadir}/applications/powermanga.desktop
 find %{buildroot}%{_datadir}/powermanga/ \
 -name Makefile.am \
 -exec rm {} \;
