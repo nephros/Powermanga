@@ -1382,6 +1382,10 @@ display_handle_events (void)
         case SDL_MOUSEMOTION:
           break;
 
+        case SDL_AUDIODEVICEADDED:
+        case SDL_AUDIODEVICEREMOVED:
+          break;
+
         default:
           LOG_INF ("not supported event type: %i", event.type);
           break;
