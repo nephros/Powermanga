@@ -1431,6 +1431,9 @@ display_handle_events (void)
         case SDL_AUDIODEVICEREMOVED:
           break;
 
+        case SDL_KEYMAPCHANGED:
+          break;
+
         default:
           LOG_INF ("not supported event type: 0x%04x", event.type);
           break;
