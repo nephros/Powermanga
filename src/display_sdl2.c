@@ -1387,7 +1387,7 @@ display_handle_events (void)
           break;
 
         default:
-          LOG_INF ("not supported event type: %i", event.type);
+          LOG_INF ("not supported event type: 0x%04x", event.type);
           break;
         }
     }
