@@ -46,7 +46,7 @@ PkgConfigBR:
   - SDL2_mixer
   - SDL2_ttf
   # SDL2_gfx
-  - egl
+  # egl
   - wayland-client # for the landscape fix
   - wayland-egl
 

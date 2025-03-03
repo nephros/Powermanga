@@ -19,7 +19,6 @@ Source100:  Powermanga.yaml
 BuildRequires:  pkgconfig(sdl2)
 BuildRequires:  pkgconfig(SDL2_mixer)
 BuildRequires:  pkgconfig(SDL2_ttf)
-BuildRequires:  pkgconfig(egl)
 BuildRequires:  pkgconfig(wayland-client)
 BuildRequires:  pkgconfig(wayland-egl)
 BuildRequires:  cmake
@@ -84,6 +83,9 @@ cp -r graphics %{buildroot}%{_datadir}/powermanga/
 printf '\n[X-Sailjail]\nApplicationName=powermanga\nOrganizationName=tlk-games\nPermissions=Sensors;Audio\n' >> powermanga.desktop
 install -Dpm644 powermanga.desktop %{buildroot}%{_datadir}/applications/powermanga.desktop
 install -Dpm644 images_for_menu_entry/powermanga.48.png %{buildroot}%{_datadir}/icons/hicolor/48x48/apps/powermanga.png
+find %{buildroot}%{_datadir}/powermanga/ \
+-name Makefile.am \
+-exec rm {} \;
 # << install post
 
 desktop-file-install --delete-original       \
