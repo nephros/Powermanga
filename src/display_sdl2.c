@@ -124,7 +124,7 @@ static SDL_Vertex triangle[3] = {
 	{ {0,0}, { 0,0,128,128}, {0,0} },
 	{ {0,0}, { 0,0,128,128}, {0,0} },
 };
-static const char* arrows[] = {"⮜","⮞","⮝","⮟","⮘","⮚","⮙","⮛"};
+//static const char* arrows[] = {"⮜","⮞","⮝","⮟","⮘","⮚","⮙","⮛"};
 static const char* buttons[] = {
   "▢", // White square with rounded corners
   "⬛", // Black large square
@@ -468,10 +468,6 @@ output_fullsceen ()
   texture = SDL_CreateTextureFromSurface(main_renderer, public_surface);
 
   if (texture != NULL) {
-	SDL_Rect drect;
-	float rat;
-	Uint16 base_width;
-	Uint16 base_offset;
 
 	// size of fire button etc:
 	const Uint32 buttonHeight = 96; const Uint32 buttonWidth = buttonHeight*2;
@@ -479,24 +475,34 @@ output_fullsceen ()
 		font = TTF_OpenFont("/usr/share/fonts/symbola/Symbola.ttf", buttonHeight);
 	};
 
-	//rat = (public_surface->w / public_surface->h);
-	rat = 512/440;
-	// make as wide as the smaller dim
-	base_width = ( window_width >= window_height) ? window_height : window_width;
-	// place the offset along the larger dim
-	base_offset = ( window_width >= window_height) ? window_width : window_height;
+	/*
+	    |        |                |        | w
+	    |        |                |        | |
+	    |        |                |        | w
+	    | larea  |     drect      | rarea  | i
+	    |        |                |        | d
+	    |        |                |        | t
+	    |        |                |        | h
+	    | --------- window height -------- | |
 
-	// FIXME: is using window_height correct here, assuming landscape mode? 
-	//drect.x = (window_height - public_surface->w)/2;
+	     NOTE: Not really landscape, wo we have to use "switched" x and y coords.
+	 */
+
+	//rat = (public_surface->w / public_surface->h);
+	float rat = 512/440; // ratio in "scale2x" mode
+	// make as wide as the smaller dim
+	Uint16 base_width = ( window_width >= window_height) ? window_height : window_width;
+	// place the offset along the larger dim
+	Uint16 base_offset = ( window_width >= window_height) ? window_width : window_height;
+
+	// position the destination rect
+	SDL_Rect drect;
 	drect.x = 0;
-	if (power_conf->scale_x >= 2 ) {
-		drect.y = (base_offset - public_surface->w)/power_conf->scale_x;
-	} else {
-		drect.y = (base_offset - public_surface->w)/2;
-	}
-	drect.w = (Uint16) base_width;
-	drect.h = (Uint16) base_width/rat;
-	//SDL_SetTextureBlendMode(texture, SDL_BLENDMODE_NONE);
+	drect.y = (power_conf->scale_x >= 2 )
+		? (base_offset - public_surface->w)/power_conf->scale_x
+		: (base_offset - public_surface->w)/2;
+	drect.w = base_width;
+	drect.h = base_width/rat;
 
 	SDL_RenderCopyEx(main_renderer, texture, NULL, &drect, 90.0, NULL, SDL_FLIP_NONE);
 
@@ -504,16 +510,14 @@ output_fullsceen ()
 	const SDL_Rect larea = { 0, drect.y+drect.w, base_width, drect.y };
 	const SDL_Rect rarea = { 0, 0, base_width, drect.y };
 
-	const char* char_menu   = buttons[18];
-	const char* char_fire   = buttons[16];
-	const char* char_option = buttons[13];
-
 	// helper rects to place the triangles in:
+	// note that actual touch handling simply uses thirds, and half the center of the thirds
 	SDL_Rect ru = { 2*larea.w/3, (larea.w/3)/2,     larea.w/3, larea.h/2 };
 	SDL_Rect rd = { 0,           (larea.w/3)/2,     larea.w/3, larea.h/2 };
 	SDL_Rect rr = { larea.w/3,   (2*larea.w/3)/2,   larea.w/3, larea.h/2 };
 	SDL_Rect rl = { larea.w/3,    0,                larea.w/3, larea.h/2 };
 
+	// triangle "buttons"
 	// h = a * (sqrt(3)/2)
 	Uint32 trih = rl.h/3;             // height of the triangle
 	Uint32 tril = trih / (sqrt(3)/2); // side length of the triangle
@@ -554,6 +558,9 @@ output_fullsceen ()
 	// buttons
 
 	//SDL_SetRenderDrawColor(main_renderer,196,0,0,128);
+	const char* char_menu   = buttons[18];
+	const char* char_fire   = buttons[16];
+	const char* char_option = buttons[13];
 	SDL_FPoint buttonPoint;
 	SDL_Surface* textSurface;
 	SDL_Texture* text;
@@ -561,12 +568,10 @@ output_fullsceen ()
 	int text_width; int text_height;
 
 	// centerbutt
-	buttonPoint.y = rarea.h+drect.h+buttonWidth/2;
+	buttonPoint.y = rarea.h+drect.h+buttonWidth/2; // not that this is not updated below.
 	buttonPoint.x = (rarea.w-buttonWidth)/2;
 	textSurface = TTF_RenderUTF8_Solid(font, char_fire, red);
-	if (textSurface == NULL) LOG_INF("Text surface failed: %s.",  TTF_GetError ());
 	text = SDL_CreateTextureFromSurface(main_renderer, textSurface);
-	if (text == NULL) LOG_INF("Text texture failed: %s.",  TTF_GetError ());
 	text_width = textSurface->w; text_height = textSurface->h;
 	renderQuad.x = buttonPoint.x + (buttonWidth/2-text_height/2);
 	renderQuad.y = buttonPoint.y + (buttonHeight/2-text_width/2);
@@ -577,9 +582,7 @@ output_fullsceen ()
 	// upperbutt
 	buttonPoint.x = 5*rarea.w/6-buttonWidth/2;
 	textSurface = TTF_RenderUTF8_Solid(font, char_menu, cyan);
-	if (textSurface == NULL) LOG_INF("Text surface failed: %s.",  TTF_GetError ());
 	text = SDL_CreateTextureFromSurface(main_renderer, textSurface);
-	if (text == NULL) LOG_INF("Text texture failed: %s.",  TTF_GetError ());
 	text_width = textSurface->w; text_height = textSurface->h;
 	renderQuad.x = buttonPoint.x + (buttonWidth/2-text_height/2);
 	renderQuad.y = buttonPoint.y + (buttonHeight/2-text_width/2);
@@ -590,9 +593,7 @@ output_fullsceen ()
 	// lowerbutt
 	buttonPoint.x = rarea.w/6-buttonWidth/2;
 	textSurface = TTF_RenderUTF8_Solid(font, char_option, orange);
-	if (textSurface == NULL) LOG_INF("Text surface failed: %s.",  TTF_GetError ());
 	text = SDL_CreateTextureFromSurface(main_renderer, textSurface);
-	if (text == NULL) LOG_INF("Text texture failed: %s.",  TTF_GetError ());
 	text_width = textSurface->w; text_height = textSurface->h;
 	renderQuad.x = buttonPoint.x + (buttonWidth/2-text_height/2);
 	renderQuad.y = buttonPoint.y + (buttonHeight/2-text_width/2);
@@ -600,15 +601,15 @@ output_fullsceen ()
 	renderQuad.h = text_height;
 	SDL_RenderCopyEx(main_renderer, text, NULL, &renderQuad, 90.0, NULL, 0);
 
-
+	// clean up
 	SDL_FreeSurface(textSurface);
 	SDL_DestroyTexture(text);
 	// end controls
 	SDL_SetRenderDrawColor(main_renderer,0,0,0,0);
 
 	//SDL_RenderCopy(main_renderer, texture, NULL, &drect);
-	SDL_RenderPresent(main_renderer);    //present renderer
-	SDL_DestroyTexture(texture);
+	SDL_RenderPresent(main_renderer);    // present renderer
+	SDL_DestroyTexture(texture);         // don't leak memory
   }
 }
 
