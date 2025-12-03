@@ -131,20 +131,21 @@ static const char* buttons[] = {
   "⬜", // White large square
   "🔲", // Black square button
   "🔳", // White square button
-
+  // 5...
   "🔴",  // Large red circle
   "🔵",  // Large blue circle
   "🔷",  // Large blue diamond
   "🔶",  // Large orange diamond
   "🔿", // Upper right shadowed white circle
-
+  // 10...
   "🔾", // Lower right shadowed white circle, circle shadow down
   "⏯️", // play or pause button emoji
   "⏯", // play or pause toggle
   "🆙", // UP! button
   "💥", // Collision emoji
-
-  "🔴", // large red circle
+  // 15..
+  "◯", // large circle
+  "⬤", // black large circle
   "🔘", // radio button
   "⏏️", // eject button/emoji
   "☰" // menu symbol (hamburger circled)
@@ -557,7 +558,7 @@ output_fullsceen ()
 	// buttons
 
 	//SDL_SetRenderDrawColor(main_renderer,196,0,0,128);
-	const char* char_menu   = buttons[18];
+	const char* char_menu   = buttons[19];
 	const char* char_fire   = buttons[16];
 	const char* char_option = buttons[13];
 	SDL_FPoint buttonPoint;
