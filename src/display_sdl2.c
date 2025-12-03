@@ -2542,9 +2542,14 @@ get_rgb_mask (Uint32 * rmask, Uint32 * gmask, Uint32 * bmask)
       *gmask = 0x00ff0000;
       *bmask = 0x0000ff00;
 #else
-      *rmask = 0x000000ff;
+      // At least on Jolla C2, red and blue are reversed
+      // or maybe SDL_BIG_ENDIAN does not work...
+      //*rmask = 0x000000ff;
+      //*gmask = 0x0000ff00;
+      //*bmask = 0x00ff0000;
+      *rmask = 0x00ff0000;
       *gmask = 0x0000ff00;
-      *bmask = 0x00ff0000;
+      *bmask = 0x000000ff;
 #endif
       break;
     }
