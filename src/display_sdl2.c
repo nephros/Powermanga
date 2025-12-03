@@ -148,9 +148,17 @@ static const char* buttons[] = {
   "⬤", // black large circle
   "🔘", // radio button
   "⏏️", // eject button/emoji
-  "☰" // menu symbol (hamburger circled)
+  "☰", // menu symbol (hamburger circled)
+  // 20...
+  "🚀", // Rocket emoji
+  "✨", // Sparkles
+  "🎇", // firework sparkler
+  "💠", // Diamond Shape with A Dot Inside
+  "⛶", // square four corners
+  // 25..
+  "⛋", // white diamond in square
+  "⮔", // Four Corner Arrows Circling Anticlockwise
 };
-
 
 static const SDL_Color orange = { 255, 128, 0, 255 };
 static const SDL_Color red =    { 255, 0, 0, 255 };
@@ -560,7 +568,7 @@ output_fullsceen ()
 	//SDL_SetRenderDrawColor(main_renderer,196,0,0,128);
 	const char* char_menu   = buttons[19];
 	const char* char_fire   = buttons[16];
-	const char* char_option = buttons[13];
+	const char* char_option = buttons[24];
 	SDL_FPoint buttonPoint;
 	SDL_Surface* textSurface;
 	SDL_Texture* text;
