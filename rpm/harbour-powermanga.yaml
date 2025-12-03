@@ -53,6 +53,11 @@ RunFdupes:
   - '%{_datadir}/%{name}'
 ConfigOptions:
   - -Wno-dev
+  # the logging function uses the __FILE__ macro from GCC.
+  # This makes the harbour validator fail on hardcoded paths to home.
+  # Use the gcc flag to replace those paths
+  - -DCMAKE_C_FLAGS_RELEASE=-ffile-prefix-map='${CMAKE_SOURCE_DIR}=.'
+  # -DCMAKE_INSTALL_DO_STRIP=ON
   # sdl must be on for sdl2 to be used:
   - -DPOWERMANGA_SDL=ON
   - -DPOWERMANGA_SDL2=ON

@@ -67,6 +67,7 @@ Screenshots:
 
 %cmake .  \
     -Wno-dev \
+    -DCMAKE_C_FLAGS_RELEASE=-ffile-prefix-map='${CMAKE_SOURCE_DIR}=.' \
     -DPOWERMANGA_SDL=ON \
     -DPOWERMANGA_SDL2=ON \
     -DUSE_SDLMIXER=ON
@@ -84,6 +85,8 @@ cp -r data     %{buildroot}%{_datadir}/%{name}/
 cp -r texts    %{buildroot}%{_datadir}/%{name}/
 cp -r sounds   %{buildroot}%{_datadir}/%{name}/
 cp -r graphics %{buildroot}%{_datadir}/%{name}/
+find %{buildroot}%{_datadir}/%{name}/ -type f -exec chmod 0644 {} +
+find %{buildroot}%{_datadir}/%{name}/ -type d -exec chmod 0755 {} +
 # << install pre
 
 # >> install post
