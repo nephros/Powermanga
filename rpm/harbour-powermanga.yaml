@@ -1,11 +1,11 @@
-Name:    powermanga
+Name:    harbour-powermanga
 Summary: An arcade 2D shoot-em-up game
 Version: 0.93.1
 Release: 0
 Group: Games
 License: GPLv3+
 URL: https://github.com/brunonymous/Powermanga
-SCM: https://github.com/brunonymous/Powermanga
+SCM: https://github.com/nephros/Powermanga
 Sources:
     - '%{name}-%{version}.tar.gz'
 #Patches:
@@ -43,7 +43,7 @@ PkgConfigBR:
 Configure: cmake
 Builder:   none
 RunFdupes:
-  - '%{_datadir}/powermanga'
+  - '%{_datadir}/%{name}'
 ConfigOptions:
   # sdl must be on for sdl2 to be used:
   - -DPOWERMANGA_SDL=ON
@@ -56,9 +56,9 @@ Files:
   - '%{_bindir}/*'
   - '%{_datadir}/applications/*.desktop'
   - '%{_datadir}/icons/*/*/apps/*'
-  - '%dir %{_datadir}/powermanga'
-  - '%{_datadir}/powermanga/*'
+  - '%dir %{_datadir}/%{name}'
+  - '%{_datadir}/%{name}/*'
   # we use the ogg file version
-  - '%exclude %{_datadir}/powermanga/sounds/*.zik'
+  - '%exclude %{_datadir}/%{name}/sounds/*.zik'
 
 
