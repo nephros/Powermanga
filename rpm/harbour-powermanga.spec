@@ -28,8 +28,14 @@ BuildRequires:  desktop-file-utils
 BuildRequires:  fdupes
 
 %description
-Powermanga is an arcade 2D shoot-em-up game with 41 levels and more
-than 200 sprites.
+Powermanga is a shoot 'em up with 60 different enemies, 40 meteors,
+numerous weapons, many end of level baddies, spaceship power-ups and lots
+of other surprises.
+
+This is a very crude port to Sailfish OS, adding basic touch controls.
+
+Powermanga is copyright TLK Games 1998-2014 and available under the
+terms of the GNU General Public License.
 
 %if "%{?vendor}" == "chum"
 Type: desktop-application
