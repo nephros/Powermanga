@@ -31,6 +31,7 @@ Description: |
 PkgBR:
   - cmake
   - extra-cmake-modules
+  - sailfish-svg2png
 PkgConfigBR:
   - sdl2
   - SDL2_mixer
@@ -45,6 +46,7 @@ Builder:   none
 RunFdupes:
   - '%{_datadir}/%{name}'
 ConfigOptions:
+  - -Wno-dev
   # sdl must be on for sdl2 to be used:
   - -DPOWERMANGA_SDL=ON
   - -DPOWERMANGA_SDL2=ON
@@ -52,12 +54,13 @@ ConfigOptions:
 NoIconCache: true
 #BuildArch: noarch
 Files:
-  - '%license COPYING'
+  # '%license COPYING'
   - '%{_bindir}/*'
   - '%{_datadir}/applications/*.desktop'
-  - '%{_datadir}/icons/*/*/apps/*'
+  - '%{_datadir}/icons/*/*/apps/*.png'
   - '%dir %{_datadir}/%{name}'
   - '%{_datadir}/%{name}/*'
+  - '%exclude %{_datadir}/icons/*/*/apps/*.svg'
   # we use the ogg file version
   - '%exclude %{_datadir}/%{name}/sounds/*.zik'
 

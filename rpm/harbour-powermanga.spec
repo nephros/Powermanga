@@ -23,6 +23,7 @@ BuildRequires:  pkgconfig(wayland-client)
 BuildRequires:  pkgconfig(wayland-egl)
 BuildRequires:  cmake
 BuildRequires:  extra-cmake-modules
+BuildRequires:  sailfish-svg2png
 BuildRequires:  desktop-file-utils
 BuildRequires:  fdupes
 
@@ -59,6 +60,7 @@ Screenshots:
 # << build pre
 
 %cmake .  \
+    -Wno-dev \
     -DPOWERMANGA_SDL=ON \
     -DPOWERMANGA_SDL2=ON \
     -DUSE_SDLMIXER=ON
@@ -79,9 +81,28 @@ cp -r graphics %{buildroot}%{_datadir}/%{name}/
 # << install pre
 
 # >> install post
+
+# generate some icons
+install -Dpm644 images_for_menu_entry/%{name}.svg %{buildroot}%{_datadir}/icons/hicolor/scalable/apps/%{name}.svg
+for size in 86 108 128 172 256 512; do
+install -d %{buildroot}%{_datadir}/icons/hicolor/${size}x${size}/apps/
+sailfish_svg2png -z 1.0 -f rgba -s 1 1 1 1 1 1 ${size} %{buildroot}%{_datadir}/icons/hicolor/scalable/apps/ %{buildroot}%{_datadir}/icons/hicolor/${size}x${size}/apps/
+done
+
 install -Dpm644 powermanga.desktop %{buildroot}%{_datadir}/applications/%{name}.desktop
-install -Dpm644 images_for_menu_entry/powermanga.48.png %{buildroot}%{_datadir}/icons/hicolor/48x48/apps/%{name}.png
-printf '\n[X-Sailjail]\nApplicationName=powermanga\nOrganizationName=tlk-games\nPermissions=Sensors;Audio\n' >> %{buildroot}%{_datadir}/applications/%{name}.desktop
+#install -Dpm644 images_for_menu_entry/powermanga.48.png %{buildroot}%{_datadir}/icons/hicolor/48x48/apps/%{name}.png
+desktop-file-edit  \
+--set-key=Exec \
+--set-value=%{name} \
+--set-name="Powermanga" \
+--set-icon=%{name} \
+--set-key=X-Nemo-Application-Type \
+--set-value=generic \
+--remove-key=Keywords \
+%{buildroot}%{_datadir}/applications/%{name}.desktop
+
+printf '\n[X-Sailjail]\nApplicationName=Powermanga\nOrganizationName=tlk-games\nPermissions=Audio\n' \
+>> %{buildroot}%{_datadir}/applications/%{name}.desktop
 find %{buildroot}%{_datadir}/%{name}/ \
 -name Makefile.am \
 -exec rm {} \;
@@ -94,12 +115,12 @@ desktop-file-install --delete-original       \
 %fdupes  %{buildroot}/%{_datadir}/%{name}
 
 %files
-%license COPYING
 %{_bindir}/*
 %{_datadir}/applications/*.desktop
-%{_datadir}/icons/*/*/apps/*
+%{_datadir}/icons/*/*/apps/*.png
 %dir %{_datadir}/%{name}
 %{_datadir}/%{name}/*
+%exclude %{_datadir}/icons/*/*/apps/*.svg
 %exclude %{_datadir}/%{name}/sounds/*.zik
 # >> files
 # << files
