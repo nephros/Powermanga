@@ -120,9 +120,9 @@ static SDL_Surface *public_surface = NULL;
 static SDL_Texture* texture = NULL;
 static TTF_Font *font;
 static SDL_Vertex triangle[3] = {
-	{ {0,0}, { 0,0,0,0}, {0,0} },
-	{ {0,0}, { 0,0,128,128}, {0,0} },
-	{ {0,0}, { 0,0,128,128}, {0,0} },
+    { {0,0}, { 0,0,0,0}, {0,0} },
+    { {0,0}, { 0,0,128,128}, {0,0} },
+    { {0,0}, { 0,0,128,128}, {0,0} },
 };
 //static const char* arrows[] = {"⮜","⮞","⮝","⮟","⮘","⮚","⮙","⮛"};
 static const char* buttons[] = {
@@ -291,7 +291,7 @@ display_init (void)
 
   /* init keys scancodes */
   init_key_status ();
-	   
+
   if (!init_video_mode ())
     {
       return FALSE;
@@ -323,7 +323,7 @@ init_video_mode (void)
   /* Ignore any video mode options if running on the GP2X or PSP
    * - force a 320x240 full screen resolution, with 8 bits per pixel,
    * as well as specific SDL surface flags */
-	flag = SDL_WINDOW_FULLSCREEN;
+  flag = SDL_WINDOW_FULLSCREEN;
 #ifdef POWERMANGA_GP2X
   window_height = GP2X_VIDEO_HEIGHT;
   /* Use a 20px y offset to center the output on the GP2X's screen */
@@ -340,13 +340,13 @@ init_video_mode (void)
     }
 #endif
 #else
-	
-	if (power_conf->fullscreen > 0)
+
+    if (power_conf->fullscreen > 0)
     {
       //flag = flag | SDL_WINDOW_FULLSCREEN;
       flag = flag | SDL_WINDOW_FULLSCREEN_DESKTOP;
     }
-		
+
   width = window_width;
   height = window_height;
   
@@ -367,22 +367,21 @@ init_video_mode (void)
   LOG_INF ("display_offset_y: %i", display_offset_y);
   is_reverse_ctrl = TRUE;
 #endif
-	
+
 #endif
 
   /* initialize video mode */
-  
+
   main_window = SDL_CreateWindow(window_tile, SDL_WINDOWPOS_UNDEFINED,
-	SDL_WINDOWPOS_UNDEFINED, 0, 0, flag);
+    SDL_WINDOWPOS_UNDEFINED, 0, 0, flag);
   if (main_window == NULL)
     {
-	  LOG_ERR("SDL_CreateWindow() return %s", SDL_GetError());
-	  return FALSE;
+      LOG_ERR("SDL_CreateWindow() return %s", SDL_GetError());
+      return FALSE;
     }
 
-	SDL_GetWindowSize(main_window, &window_width, &window_height);
-	LOG_INF("SDL_CreateWindow() created size %i %i", window_width, window_height);
-
+  SDL_GetWindowSize(main_window, &window_width, &window_height);
+  LOG_INF("SDL_CreateWindow() created size %i %i", window_width, window_height);
 
   SDL_SysWMinfo swminfo;
   SDL_VERSION(&swminfo.version)
@@ -398,8 +397,8 @@ init_video_mode (void)
   main_renderer = SDL_CreateRenderer(main_window, -1, rflags);
   if (main_renderer == NULL) 
     {
-	  LOG_ERR("SDL_CreateRenderer() return %s", SDL_GetError());
-	  return FALSE;
+      LOG_ERR("SDL_CreateRenderer() return %s", SDL_GetError());
+      return FALSE;
     }
 
   SDL_DisplayMode dm;
@@ -409,16 +408,16 @@ init_video_mode (void)
       LOG_ERR ("SDL_GetWindowDisplayMode() return %s", SDL_GetError ());
       return FALSE;
     }
-	LOG_INF("SDL_GetWindowDisplayMode() reported size %i %i", dm.w, dm.h);
+  LOG_INF("SDL_GetWindowDisplayMode() reported size %i %i", dm.w, dm.h);
 
   bytes_per_pixel = SDL_BYTESPERPIXEL(dm.format); 
   /* note: SDL_BITSPERPIXEL can return 24 for 4 bytes per pixels if
      alpha is ignored in video mode */
   bits_per_pixel = bytes_per_pixel * 8;
-  
+
   LOG_INF ("depth of screen: %i; bytes per pixel: %i;",
            bits_per_pixel, bytes_per_pixel);
-  	
+
   LOG_INF ("SDL_SetVideoMode() successful window_width: %i;"
            " window_height: %i; bits_per_pixel: %i; Rmask",
            width, height, bits_per_pixel);
@@ -718,7 +717,7 @@ create_palettes (void)
           sdl_color_palette[i].b = src[2];
           src += 3;
         }
-		SDL_SetPaletteColors(public_surface->format->palette, sdl_color_palette, 0, 256);	  
+      SDL_SetPaletteColors(public_surface->format->palette, sdl_color_palette, 0, 256);
     }
   else
     /* 16-bit depth with 65336 colors */
@@ -1164,7 +1163,7 @@ display_handle_events (void)
                "%i %i %i %i\n", ke->type, ke->keysym.sym,
                ke->keysym.scancode, ke->state); */
 
-  		    if (lastKeySym != 0) {
+		    if (lastKeySym != 0) {
 				/* release previous key from SDL_TEXTINPUT */
 				sprites_string_key_up (lastKeySym, lastKeySym);
 				lastKeySym = 0;
@@ -1178,7 +1177,7 @@ display_handle_events (void)
             key_status (SDL_GetKeyboardState (NULL));
           }
           break;
-		  
+
 		case SDL_TEXTINPUT:
 			/* use only ASCII chars */
 			uc = (Uint32)event.text.text[0];
@@ -1731,8 +1730,8 @@ display_movie (void)
           {
             LOG_ERR ("SDL_BlitSurface() return %s", SDL_GetError ());
           }
-		  //SDL_UpdateWindowSurface(main_window);
-		  output_fullsceen();
+      //SDL_UpdateWindowSurface(main_window);
+      output_fullsceen();
       }
       break;
 
@@ -1771,8 +1770,8 @@ display_movie (void)
           }
       }
 
-	  //SDL_UpdateWindowSurface(main_window);
-	  output_fullsceen();
+      //SDL_UpdateWindowSurface(main_window);
+      output_fullsceen();
       break;
 
       /* scale 2x, 3x or 4x mode */
@@ -1789,8 +1788,8 @@ display_movie (void)
 #ifdef __EMSCRIPTEN__
       SDL_UnlockSurface (public_surface);
 #endif
-	  //SDL_UpdateWindowSurface(main_window);
-	  output_fullsceen();
+      //SDL_UpdateWindowSurface(main_window);
+      output_fullsceen();
       break;
     }
 }
@@ -2513,7 +2512,7 @@ create_surface (Uint32 width, Uint32 height)
       return NULL;
     }
   if (bytes_per_pixel == 1)
-	  SDL_SetPaletteColors(surface->format->palette, sdl_color_palette, 0, 256);
+      SDL_SetPaletteColors(surface->format->palette, sdl_color_palette, 0, 256);
 
   surfaces_list[index] = surface;
   surfaces_counter++;
